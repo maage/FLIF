@@ -1413,6 +1413,9 @@ bool flif_decode(IO& io, Images &images, callback_t callback, void *user_data, i
     if (options.metadata) {
       images[0].metadata = metadata;
     }
+
+    if (images[0].zooms() == 0) { e_printf("FLIF did not get proper zoom data\n"); return false;}
+
     return true;
 }
 
