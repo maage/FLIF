@@ -1415,6 +1415,11 @@ bool flif_decode(IO& io, Images &images, callback_t callback, void *user_data, i
     }
 
     if (images[0].zooms() == 0) { e_printf("FLIF did not get proper zoom data\n"); return false;}
+    for (int p = 0; p < images[0].numPlanes(); p++) {
+      for (Image& image : images) {
+        if (!image.getPlane(p).initialized()) { e_printf("ERROR: Parse not okay, not all planes initialized\n");return false;}
+      }
+    }
 
     return true;
 }

@@ -177,6 +177,7 @@ public:
     virtual void prepare_zoomlevel(const int z) const =0;
     virtual ColorVal get_fast(size_t r, size_t c) const =0;
     virtual void set_fast(size_t r, size_t c, ColorVal x) =0;
+    virtual bool initialized() =0;
 
     virtual bool is_constant() const { return false; }
     virtual int bytes_per_pixel() const { return 0; }
@@ -243,6 +244,9 @@ public:
 #endif
         assert(data != nullptr);
         if (height > 1) v_printf(6,"Allocated %u x %u buffer (%i-bit).\n",width,height,8 * sizeof(pixel_t));
+    }
+    bool initialized() override {
+        return (data != NULL);
     }
     void clear() {
         data_vec.clear();
@@ -362,6 +366,9 @@ class ConstantPlane final : public GeneralPlane {
     ColorVal color;
 public:
     explicit ConstantPlane(ColorVal c) : color(c) {}
+    bool initialized() override {
+        return true;
+    }
     void set(const size_t r, const size_t c, const ColorVal x) override {
         assert(x == color);
     }
