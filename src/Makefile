@@ -1,7 +1,9 @@
 PREFIX := $(DESTDIR)/usr/local
+LIBDIR := $(PREFIX)/lib
 CXXFLAGS := $(shell pkg-config --cflags zlib libpng) -DLODEPNG_NO_COMPILE_PNG -DLODEPNG_NO_COMPILE_DISK
 CFLAGS := $(shell pkg-config --cflags zlib libpng) -DLODEPNG_NO_COMPILE_PNG -DLODEPNG_NO_COMPILE_DISK
 LDFLAGS := $(shell pkg-config --libs libpng)
+STRIP_OPT := # -s
 
 OSNAME := $(shell uname -s)
 SONAME = -soname
@@ -15,7 +17,7 @@ ifeq ($(OSNAME),Darwin)
 endif
 
 # for running interface-test
-export LD_LIBRARY_PATH=$(shell pwd):/usr/local/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$(shell pwd):$(LIBDIR):$LD_LIBRARY_PATH
 
 FILES_H := maniac/*.hpp maniac/*.cpp image/*.hpp transform/*.hpp flif-enc.hpp flif-dec.hpp common.hpp flif_config.h fileio.hpp io.hpp io.cpp config.h compiler-specific.hpp ../extern/lodepng.h
 FILES_CPP := maniac/chance.cpp maniac/symbol.cpp image/crc32k.cpp image/image.cpp image/image-png.cpp image/image-pnm.cpp image/image-pam.cpp image/image-rggb.cpp image/image-metadata.cpp image/color_range.cpp transform/factory.cpp common.cpp flif-enc.cpp flif-dec.cpp io.cpp ../extern/lodepng.cpp
@@ -77,21 +79,17 @@ pixbufloader: libpixbufloader-flif$(LIBEXT)
 
 install: flif libflif$(LIBEXT) install-libflif$(LIBEXT)
 	install -d $(PREFIX)/bin $(PREFIX)/share/man/man1
-	install -m 755 flif $(PREFIX)/bin
-	strip -x $(PREFIX)/bin/flif
+	install -m 755 $(STRIP_OPT) flif $(PREFIX)/bin
 	install -m 644 ../doc/flif.1 $(PREFIX)/share/man/man1
 	install -m 755 ../tools/gif2flif $(PREFIX)/bin
 	install -m 755 ../tools/apng2flif $(PREFIX)/bin
 
 install-viewflif:
-	install -m 755 viewflif $(PREFIX)/bin
-	strip -x $(PREFIX)/bin/viewflif
+	install -m 755 $(STRIP_OPT) viewflif $(PREFIX)/bin
 
 install-libflif$(LIBEXT): libflif$(LIBEXT)
-	install -d $(PREFIX)/lib
-	install -m 755 libflif$(LIBEXT) libflif$(LIBEXTV) $(PREFIX)/lib
-	strip -x $(PREFIX)/lib/libflif$(LIBEXT) \
-	  $(PREFIX)/lib/libflif$(LIBEXTV)
+	install -d $(LIBDIR)
+	install -m 755 $(STRIP_OPT) libflif$(LIBEXT) libflif$(LIBEXTV) $(LIBDIR)
 
 # There is no prefix here because gdk-pixbuf will not search /usr/local for loadrs
 # while it sucks, it's the truth
@@ -107,11 +105,8 @@ install-dev:
 	install -m 644 library/*.h $(PREFIX)/include
 
 install-decoder: decoder
-	install -m 755 dflif $(PREFIX)/bin
-	strip -x $(PREFIX)/bin/dflif
-	install -m 755 libflif_dec$(LIBEXT) libflif_dec$(LIBEXTV) $(PREFIX)/lib
-	strip -x $(PREFIX)/lib/libflif_dec$(LIBEXT) \
-	  $(PREFIX)/lib/libflif_dec$(LIBEXTV)
+	install -m 755 $(STRIP_OPT) dflif $(PREFIX)/bin
+	install -m 755 $(STRIP_OPT) libflif_dec$(LIBEXT) libflif_dec$(LIBEXTV) $(LIBDIR)
 
 magic:
 	if ! grep -q FLIF /etc/magic; then cat ../doc/flif.magic >> /etc/magic; fi
@@ -125,10 +120,10 @@ uninstall:
 	rm -f $(PREFIX)/include/flif_common.h
 	rm -f $(PREFIX)/include/flif_dec.h
 	rm -f $(PREFIX)/include/flif_enc.h
-	rm -f $(PREFIX)/lib/libflif$(LIBEXT)
-	rm -f $(PREFIX)/lib/libflif_dec$(LIBEXT)
-	rm -f $(PREFIX)/lib/libflif$(LIBEXTV)
-	rm -f $(PREFIX)/lib/libflif_dec$(LIBEXTV)
+	rm -f $(LIBDIR)/libflif$(LIBEXT)
+	rm -f $(LIBDIR)/libflif_dec$(LIBEXT)
+	rm -f $(LIBDIR)/libflif$(LIBEXTV)
+	rm -f $(LIBDIR)/libflif_dec$(LIBEXTV)
 	rm -f $(PREFIX)/share/man/man1/flif.1
 	rm -f /usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-flif$(LIBEXT)
 
