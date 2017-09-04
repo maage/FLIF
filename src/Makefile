@@ -139,7 +139,7 @@ clean:
 # The targets below are only meant for developers
 
 test-interface: libflif.dbg$(LIBEXT) libflif$(LIBEXT) ../tools/test.c
-	$(CC) -O0 -ggdb3 -Wall -Ilibrary/ ../tools/test.c -L. -lflif.dbg  -o test-interface
+	$(CC) -O0 -ggdb3 -Wall -Ilibrary/ ../tools/test.c -L. -lflif.dbg -o test-interface
 
 test: flif test-interface
 	mkdir -p ../tmp-test
@@ -178,7 +178,7 @@ test.asan: flif.asan test-interface viewflif.asan
 # ASAN may find leaks in code which is not ours and in that case it will throw bad exitcodes on first occurence
 # but we want or tests to continue running, so ignore exit code for now
 	../tools/test-roundtrip.sh ./flif.asan ../tools/2_webp_ll.png ../tmp-test/2_webp_ll.flif ../tmp-test/decoded_2_webp_ll.png || true
-	../tools/test-roundtrip.sh ./flif.asan ../tools/kodim01.png ../tmp-test/kodim01.flif ../tmp-test/decoded_kodim01.png  || true
+	../tools/test-roundtrip.sh ./flif.asan ../tools/kodim01.png ../tmp-test/kodim01.flif ../tmp-test/decoded_kodim01.png || true
 	../tools/test-lossy.sh ./flif.asan ../tools/kodim01.png ../tmp-test/kodim01-lossy.flif ../tmp-test/decoded_kodim01-lossy.png || true
 	../tools/test-roundtrip_anim.sh ./flif.asan ../tools/endless_war.gif ../tmp-test/endless_war.flif || true
 	../tools/test-roundtrip_anim_framedir.sh ./flif.asan ../tools/bouncing_ball_frames ../tmp-test/bouncing_ball.flif || true
